@@ -1,22 +1,10 @@
+
 "use client";
 
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Icon, LatLngTuple } from "leaflet";
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Icon, LatLngTuple, Marker as LeafletMarker } from "leaflet";
+import { Dispatch, SetStateAction, useCallback, useMemo, useRef, useState } from "react";
 
 interface prop {
   latlng: [LatLngTuple, Dispatch<SetStateAction<LatLngTuple>>];
@@ -30,10 +18,9 @@ interface TypeE {
 function DraggableMarker({ latlng }: prop) {
   const [draggable, setDraggable] = useState(false);
   const [position, setPosition] = latlng;
-  const markerRef = useRef<any>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
   const customLocIcon = new Icon({
-    iconUrl:
-      "https://www.iconpacks.net/icons/2/free-location-pin-icon-2965-thumb.png",
+    iconUrl: "https://www.iconpacks.net/icons/2/free-location-pin-icon-2965-thumb.png",
     iconSize: [32, 32],
   });
 
@@ -42,7 +29,7 @@ function DraggableMarker({ latlng }: prop) {
       map.locate();
     },
     locationfound(e) {
-      let location: TypeE = e.latlng;
+      const location: TypeE = e.latlng;
       setPosition([location.lat, location.lng]);
       map.flyTo(e.latlng, map.getZoom());
     },
@@ -52,16 +39,16 @@ function DraggableMarker({ latlng }: prop) {
     () => ({
       dragend() {
         const marker = markerRef.current;
-        if (marker != null) {
+        if (marker) {
           setPosition([marker.getLatLng().lat, marker.getLatLng().lng]);
         }
       },
     }),
-    [],
+    [setPosition]
   );
 
   const toggleDraggable = useCallback(() => {
-    setDraggable((d: any) => !d);
+    setDraggable((d) => !d);
   }, []);
 
   return (
@@ -74,9 +61,7 @@ function DraggableMarker({ latlng }: prop) {
     >
       <Popup minWidth={90}>
         <span onClick={toggleDraggable}>
-          {draggable
-            ? "Marker is draggable"
-            : "Click here to make marker draggable"}
+          {draggable ? "Marker is draggable" : "Click here to make marker draggable"}
         </span>
       </Popup>
     </Marker>
@@ -92,9 +77,7 @@ export default function Map({ latlng }: prop) {
       className="h-full"
     >
       <TileLayer
-        attribution={
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <DraggableMarker latlng={latlng} />
